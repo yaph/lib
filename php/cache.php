@@ -31,9 +31,11 @@ class Cache {
    *
    * @param string $dir
    * @param int $duration
+   * Cache duration in seconds, 0 meaning cache forever.
+   * 
    * @param bool $serialize
    */
-  public function __construct($dir, $duration, $serialize = FALSE) {
+  public function __construct($dir, $duration = 0, $serialize = FALSE) {
     $this->dir = $dir;
     $this->duration = $duration;
     $this->serialize = $serialize;
@@ -58,8 +60,8 @@ class Cache {
    * @param string $duration
    * @return string $duration
    */
-  public function duration($duration = '') {
-    if ($duration) {
+  public function duration($duration = NULL) {
+    if (!is_null($duration)) {
       $this->duration = $duration;
     }
     return $this->duration;
@@ -89,7 +91,8 @@ class Cache {
       return FALSE;
     }
 
-    if (time() - filemtime($cache_file) > $this->duration()) {
+    $duration = $this->duration();
+    if ($duration && (time() - filemtime($cache_file) > $duration)) {
       return FALSE;
     }
 
