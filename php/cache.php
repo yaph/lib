@@ -24,6 +24,13 @@ class Cache {
    */
   private $serialize;
   
+  /**
+   * Create sub directories for cache files
+   *
+   * @var bool $make_subdir
+   */
+  private $make_subdir;
+  
   const UMASK = 0777;
 
   /**
@@ -35,10 +42,11 @@ class Cache {
    * 
    * @param bool $serialize
    */
-  public function __construct($dir, $duration = 0, $serialize = FALSE) {
+  public function __construct($dir, $duration = 0, $serialize = FALSE, $make_subdir = FALSE) {
     $this->dir = $dir;
     $this->duration = $duration;
     $this->serialize = $serialize;
+    $this->make_subdir = $make_subdir;
   }
 
   /**
@@ -90,25 +98,20 @@ class Cache {
     if (!file_exists($cache_file)) {
       return FALSE;
     }
-
     $duration = $this->duration();
     if ($duration && (time() - filemtime($cache_file) > $duration)) {
       return FALSE;
     }
-
     if (!$fh = fopen($cache_file, 'r')) {
       return FALSE;
     }
-
     $data = '';
     while (($buffer = fread($fh, 4096)) != '') {
       $data .= $buffer;
     }
-
     if ($this->serialize()) {
       $data = unserialize($data);
     }
-
     return $data;
   }
 
@@ -126,20 +129,28 @@ class Cache {
     if (!$fh = fopen($cache_file, 'w')) {
       return FALSE;
     }
-
     if ($this->serialize()) {
       $data = serialize($data);
     }
-
     if (fwrite($fh, $data) === FALSE) {
       return FALSE;
     }
     fclose($fh);
     return TRUE;
   }
-  
+
+  /**
+   * Get path component for cache file.
+   *
+   * @param string $cache_id
+   * @return string $dir
+   */
   public function path($cache_id) {
-    return $this->dir() . substr($cache_id, 0 ,2) . DIRECTORY_SEPARATOR;
+    $dir = $this->dir();
+    if ($this->make_subdir) {
+      $dir .= substr($cache_id, 0 ,2) . DIRECTORY_SEPARATOR;
+    }
+    return $dir;
   }
 
   /**
