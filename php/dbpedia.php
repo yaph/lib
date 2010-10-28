@@ -13,7 +13,7 @@ abstract class DBpedia {
     'http://www.w3.org/2004/02/skos/core#' => 'skos'
   );
 
-  abstract function uriMap(){}
+  abstract public function uriMap();
 
   public static function url($url, $format = 'json') {
     if ($format) {
