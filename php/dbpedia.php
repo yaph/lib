@@ -1,5 +1,5 @@
 <?php
-class DBpedia {
+abstract class DBpedia {
   public static $ns = array(
     'http://www.w3.org/2002/07/owl#' => 'owl',
     'http://www.w3.org/2001/XMLSchema#' => 'xsd',
@@ -12,6 +12,9 @@ class DBpedia {
     'http://dbpedia.org/' => 'dbpedia',
     'http://www.w3.org/2004/02/skos/core#' => 'skos'
   );
+
+  abstract function uriMap(){}
+
   public static function url($url, $format = 'json') {
     if ($format) {
       $url .= '.' . $format;
