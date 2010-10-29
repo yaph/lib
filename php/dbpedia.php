@@ -1,5 +1,5 @@
 <?php
-class DBpedia {
+class DBPedia {
   public static $ns = array(
     'http://www.w3.org/2002/07/owl#' => 'owl',
     'http://www.w3.org/2001/XMLSchema#' => 'xsd',
@@ -15,7 +15,13 @@ class DBpedia {
   
   public $data = array();
   
-  public $uri = '';
+  private $uri = '';
+  
+  private $typeKey = '';
+  
+  private $typeValue = '';
+  
+  private $parentKey = '';
 
   public function parseJSON($JSON_string) {
     $JSON = json_decode($JSON_string);
@@ -25,21 +31,28 @@ class DBpedia {
   
   private function recurseJSON($JSON) {
     foreach ($JSON as $k => $v) {
+      $tk = gettype($k);
       $tv = gettype($v);
+//      if ('string' == $tk) {
+//        $this->parentKey = $k;
+//      }
+$this->parentKey = $k;
+$this->data[$k][] = $v;
       switch ($tv) {
         case 'object':
-          if (isset($v->type)) {
-            if ('literal' == $v->type) {
-              $this->data[$this->uri][$v->lang] = $v->value;
-            }
-            elseif ('uri' == $v->type) {
-              $this->uri = $v->value;
-            }
-          }
+//          if (isset($v->type)) {
+//            if ('literal' == $v->type) {
+//              $this->data[$this->parentKey][] = $v->value;
+//            }
+//            elseif ('uri' == $v->type) {
+//              $this->uri = $v->value;
+//            }
+//          }
         case 'array':
-var_dump($v);
           $this->recurseJSON($v);
           break;
+        default:
+//          $this->data[$k][] = $v;
       }
     }
   }
