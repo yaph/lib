@@ -1,5 +1,5 @@
 <?php
-abstract class DBpedia {
+class DBpedia {
   public static $ns = array(
     'http://www.w3.org/2002/07/owl#' => 'owl',
     'http://www.w3.org/2001/XMLSchema#' => 'xsd',
@@ -12,8 +12,37 @@ abstract class DBpedia {
     'http://dbpedia.org/' => 'dbpedia',
     'http://www.w3.org/2004/02/skos/core#' => 'skos'
   );
+  
+  public $data = array();
+  
+  public $uri = '';
 
-  abstract public function uriMap();
+  public function parseJSON($JSON_string) {
+    $JSON = json_decode($JSON_string);
+    $this->recurseJSON($JSON);
+    return $this->data;
+  }
+  
+  private function recurseJSON($JSON) {
+    foreach ($JSON as $k => $v) {
+      $tv = gettype($v);
+      switch ($tv) {
+        case 'object':
+          if (isset($v->type)) {
+            if ('literal' == $v->type) {
+              $this->data[$this->uri][$v->lang] = $v->value;
+            }
+            elseif ('uri' == $v->type) {
+              $this->uri = $v->value;
+            }
+          }
+        case 'array':
+var_dump($v);
+          $this->recurseJSON($v);
+          break;
+      }
+    }
+  }
 
   public static function url($url, $format = 'json') {
     if ($format) {
