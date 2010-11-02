@@ -1,5 +1,5 @@
 <?php
-class DBPedia {
+class DBpedia {
   public static $ns = array(
     'http://www.w3.org/2002/07/owl#' => 'owl',
     'http://www.w3.org/2001/XMLSchema#' => 'xsd',
