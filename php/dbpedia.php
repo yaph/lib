@@ -15,9 +15,11 @@ class DBpedia {
 
   public $data = array();
 
-  private $_prefixResource = 'http://dbpedia.org/resource/';
-  
-  private $_propertyRedirect = 'http://dbpedia.org/property/redirect';
+  private $_uriResource = 'http://dbpedia.org/resource/';
+
+  private $_uriData = 'http://dbpedia.org/data/';
+
+  private $_uriRedirect = 'http://dbpedia.org/property/redirect';
 
   private $_uri = '';
 
@@ -26,10 +28,10 @@ class DBpedia {
   public function parseJSON($JSON_string) {
     $JSON = json_decode($JSON_string);
     foreach ($JSON as $uri => $data) {
-      if (0 === strpos($uri, $this->_prefixResource)) {
+      if (0 === strpos($uri, $this->_uriResource)) {
         if ('object' == gettype($data)) {
           $uri = key($data);
-          if ('string' == gettype($uri) && $this->_propertyRedirect != $uri) {
+          if ('string' == gettype($uri) && $this->_uriRedirect != $uri) {
             #$this->data[$uri] = $data;
             # FIXME process $data recursively
           }
@@ -69,7 +71,8 @@ $this->data[$k][] = $v;
     }
   }
 
-  public static function url($url, $format = 'json') {
+  # FIXME work with substr and $_uriData and $_uriResource
+  public static function resourceDataUri($url, $format = 'json') {
     if ($format) {
       $url .= '.' . $format;
       $url = str_replace('dbpedia.org/resource/', 'dbpedia.org/data/', $url);
