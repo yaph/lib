@@ -12,20 +12,32 @@ class DBpedia {
     'http://dbpedia.org/' => 'dbpedia',
     'http://www.w3.org/2004/02/skos/core#' => 'skos'
   );
-  
+
   public $data = array();
+
+  private $_prefixResource = 'http://dbpedia.org/resource/';
   
-  private $uri = '';
-  
-  private $typeKey = '';
-  
-  private $typeValue = '';
-  
-  private $parentKey = '';
+  private $_propertyRedirect = 'http://dbpedia.org/property/redirect';
+
+  private $_uri = '';
+
+  private $_parentKey = '';
 
   public function parseJSON($JSON_string) {
     $JSON = json_decode($JSON_string);
-    $this->recurseJSON($JSON);
+    foreach ($JSON as $uri => $data) {
+      if (0 === strpos($uri, $this->_prefixResource)) {
+        if ('object' == gettype($data)) {
+          $uri = key($data);
+          if ('string' == gettype($uri) && $this->_propertyRedirect != $uri) {
+            #$this->data[$uri] = $data;
+            # FIXME process $data recursively
+          }
+        }
+      }
+    }
+    
+    //$this->recurseJSON($JSON);
     return $this->data;
   }
   
@@ -34,18 +46,18 @@ class DBpedia {
       $tk = gettype($k);
       $tv = gettype($v);
 //      if ('string' == $tk) {
-//        $this->parentKey = $k;
+//        $this->_parentKey = $k;
 //      }
-$this->parentKey = $k;
+$this->_parentKey = $k;
 $this->data[$k][] = $v;
       switch ($tv) {
         case 'object':
 //          if (isset($v->type)) {
 //            if ('literal' == $v->type) {
-//              $this->data[$this->parentKey][] = $v->value;
+//              $this->data[$this->_parentKey][] = $v->value;
 //            }
 //            elseif ('uri' == $v->type) {
-//              $this->uri = $v->value;
+//              $this->_uri = $v->value;
 //            }
 //          }
         case 'array':
