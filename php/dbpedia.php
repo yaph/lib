@@ -13,71 +13,67 @@ class DBpedia {
     'http://www.w3.org/2004/02/skos/core#' => 'skos'
   );
 
-  public $data = array();
-
   private $_uriResource = 'http://dbpedia.org/resource/';
 
   private $_uriData = 'http://dbpedia.org/data/';
 
   private $_uriRedirect = 'http://dbpedia.org/property/redirect';
 
-  private $_uri = '';
+  private $_properties = array();
 
-  private $_parentKey = '';
+  private $_parentUri = '';
+  //
+//  private $_uri = '';
+//
+//  
+//
 
   public function parseJSON($JSON_string) {
     $JSON = json_decode($JSON_string);
-    foreach ($JSON as $uri => $data) {
-      if (0 === strpos($uri, $this->_uriResource)) {
-        if ('object' == gettype($data)) {
-          $uri = key($data);
-          if ('string' == gettype($uri) && $this->_uriRedirect != $uri) {
-            #$this->data[$uri] = $data;
-            # FIXME process $data recursively
-          }
-        }
-      }
-    }
-    
-    //$this->recurseJSON($JSON);
-    return $this->data;
+    $this->_recurseJSON($JSON);
   }
-  
-  private function recurseJSON($JSON) {
-    foreach ($JSON as $k => $v) {
-      $tk = gettype($k);
-      $tv = gettype($v);
-//      if ('string' == $tk) {
-//        $this->_parentKey = $k;
-//      }
-$this->_parentKey = $k;
-$this->data[$k][] = $v;
-      switch ($tv) {
-        case 'object':
-//          if (isset($v->type)) {
-//            if ('literal' == $v->type) {
-//              $this->data[$this->_parentKey][] = $v->value;
-//            }
-//            elseif ('uri' == $v->type) {
-//              $this->_uri = $v->value;
-//            }
-//          }
-        case 'array':
-          $this->recurseJSON($v);
-          break;
-        default:
-//          $this->data[$k][] = $v;
+
+  private function _recurseJSON($JSON) {
+    foreach ($JSON as $uri => $data) {
+      $typeData = gettype($data);
+      if ('string' == gettype($uri)) {
+        $this->_parentUri = $uri;
+        $key = $uri;
+      } else {
+        $key = $this->_parentUri;
+      }
+      # FIXME doesn't yet work as intended
+      if ('object' == $typeData || 'array' == $typeData) {
+        $this->_recurseJSON($data);
+        if ($this->_uriRedirect != $uri
+        && (false === strpos($uri, $this->_uriResource))) {
+          $this->_properties[$key] = $data;
+        }
       }
     }
   }
 
-  # FIXME work with substr and $_uriData and $_uriResource
+  /**
+   * Get an array of properties keyed by property name.
+   * @param string $name
+   * Options:
+   *  uri = complete URI
+   *  property = property part of URI, i.e. the part after the last slash
+   * @param string $lang
+   */
+  public function getProperties($name = 'uri', $lang = '') {
+    return $this->_properties;
+  }
+
+  /**
+   * Get the corrsponding data URI for a resource.
+   * @param string $url
+   * @param string $format
+   */
   public static function resourceDataUri($url, $format = 'json') {
+    $url = str_replace($this->_uriResource, $this->_uriData, $url);
     if ($format) {
       $url .= '.' . $format;
-      $url = str_replace('dbpedia.org/resource/', 'dbpedia.org/data/', $url);
-    } else {
-      $url = str_replace('dbpedia.org/resource/', 'dbpedia.org/page/', $url);
     }
     return $url;
   }
