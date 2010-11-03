@@ -22,17 +22,20 @@ class DBpedia {
   private $_properties = array();
 
   private $_parentUri = '';
-  //
-//  private $_uri = '';
-//
-//  
-//
 
+  /**
+   * TODO documentation
+   * @param unknown_type $JSON_string
+   */
   public function parseJSON($JSON_string) {
     $JSON = json_decode($JSON_string);
     $this->_recurseJSON($JSON);
   }
 
+  /**
+   * TODO documentation
+   * @param unknown_type $JSON
+   */
   private function _recurseJSON($JSON) {
     foreach ($JSON as $uri => $data) {
       $typeData = gettype($data);
