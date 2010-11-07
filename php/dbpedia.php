@@ -26,14 +26,13 @@ class DBpedia {
    */
   private function _recurseJSON($JSON) {
     foreach ($JSON as $uri => $data) {
-      $typeData = gettype($data);
       if ($this->_isNamespace($uri)) {
         $this->_parentUri = $uri;
         $key = $uri;
       } else {
         $key = $this->_parentUri;
       }
-      if ('object' == $typeData || 'array' == $typeData) {
+      if ($this->_isIterable($data)) {
         $this->_recurseJSON($data);
         if ($this->_uriRedirect != $uri
         && (false === strpos($uri, $this->_uriResource))) {
@@ -55,6 +54,16 @@ class DBpedia {
     return false;
   }
 
+  /**
+   * Check wheter data can be iterated.
+   * @param mixed $d
+   * @return bool
+   */
+  private function _isIterable($d) {
+    $t = gettype($d);
+    return ('array' == $t || 'object' == $t) ? true : false;
+  }
+  
   /**
    * Get the corrsponding data URI for a resource.
    * @param string $url
@@ -78,6 +87,33 @@ class DBpedia {
    */
   public function getProperties($name = 'uri', $lang = '') {
     return $this->_properties;
+  }
+
+  /**
+   * Get property identified by $uri. If $lang is given, return corresponding 
+   * language string.
+   *
+   * @param string $uri
+   * @param string $lang
+   */
+  public function getProperty($uri, $lang = '') {
+    $properties = $this->getProperties();
+    if (!isset($properties[$uri])) {
+      return false;
+    }
+    $data = $properties[$uri];
+    if ($lang) {
+      if ($this->_isIterable($data)) {
+        foreach ($data as $prop) {
+          if (isset($prop->type) && 'literal' == $prop->type
+            && isset($prop->lang) && $lang == $prop->lang
+            && isset($prop->value)) {
+            return $prop->value;
+          }
+        }
+      }
+    }
+    return $data;
   }
 
   # FIXME can be removed
