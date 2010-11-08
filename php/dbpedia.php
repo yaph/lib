@@ -1,11 +1,15 @@
 <?php
 class DBpedia {
 
-  private $_uriResource = 'http://dbpedia.org/resource/';
+  const URI_RESOURCE = 'http://dbpedia.org/resource/';
 
-  private $_uriData = 'http://dbpedia.org/data/';
+  const URI_DATA = 'http://dbpedia.org/data/';
 
-  private $_uriRedirect = 'http://dbpedia.org/property/redirect';
+  const URI_REDIRECT = 'http://dbpedia.org/property/redirect';
+  
+  const URI_MEDIA_S = 'http://upload.wikimedia.org/wikipedia/commons/';
+  
+  const URI_MEDIA_R = 'http://upload.wikimedia.org/wikipedia/en/';
 
   private $_properties = array();
 
@@ -34,8 +38,8 @@ class DBpedia {
       }
       if ($this->_isIterable($data)) {
         $this->_recurseJSON($data);
-        if ($this->_uriRedirect != $uri
-        && (false === strpos($uri, $this->_uriResource))) {
+        if (self::URI_REDIRECT != $uri
+        && (false === strpos($uri, self::URI_RESOURCE))) {
           $this->_properties[$key] = $data;
         }
       }
@@ -64,17 +68,26 @@ class DBpedia {
     return ('array' == $t || 'object' == $t) ? true : false;
   }
   
+  public static function mediaUri($uri, $type = 'image') {
+    return str_replace(self::URI_MEDIA_S, self::URI_MEDIA_R, $uri);
+  }
+  
   /**
    * Get the corrsponding data URI for a resource.
    * @param string $url
    * @param string $format
    */
   public static function resourceDataUri($url, $format = 'json') {
-    $url = str_replace($this->_uriResource, $this->_uriData, $url);
+    $url = str_replace(self::URI_RESOURCE, self::URI_DATA, $url);
     if ($format) {
       $url .= '.' . $format;
     }
     return $url;
+  }
+  
+  public static function nameFromUri($uri) {
+    $path = parse_url($uri, PHP_URL_PATH);
+    return str_replace('_', ' ', substr($path, strrpos($path, '/') + 1));
   }
 
   /**
@@ -102,17 +115,22 @@ class DBpedia {
       return false;
     }
     $data = $properties[$uri];
-    if ($lang) {
-      if ($this->_isIterable($data)) {
-        foreach ($data as $prop) {
-          if (isset($prop->type) && 'literal' == $prop->type
-            && isset($prop->lang) && $lang == $prop->lang
-            && isset($prop->value)) {
-            return $prop->value;
+    if ($this->_isIterable($data)) {
+      foreach ($data as $prop) {
+        if (isset($prop->type) && isset($prop->value)) {
+          $type = $prop->type;
+          $value = $prop->value;
+          if ($lang && 'literal' == $prop->type 
+            && isset($prop->lang) && $lang == $prop->lang) {
+            return $value;
+          }
+          if ('uri' == $prop->type) {
+             return $value;
           }
         }
       }
     }
+
     return $data;
   }
 
