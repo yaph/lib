@@ -74,20 +74,25 @@ class DBpedia {
   
   /**
    * Get the corrsponding data URI for a resource.
-   * @param string $url
+   * @param string $uri
    * @param string $format
    */
-  public static function resourceDataUri($url, $format = 'json') {
-    $url = str_replace(self::URI_RESOURCE, self::URI_DATA, $url);
+  public static function dataUri($uri, $format = 'json') {
+    $uri = self::URI_DATA . self::idFromUri($uri);
     if ($format) {
-      $url .= '.' . $format;
+      $uri .= '.' . $format;
     }
-    return $url;
+    return $uri;
   }
   
   public static function nameFromUri($uri) {
-    $path = parse_url($uri, PHP_URL_PATH);
-    return str_replace('_', ' ', substr($path, strrpos($path, '/') + 1));
+    return str_replace('_', ' ', self::idFromUri($uri));
+  }
+  
+  public static function idFromUri($uri) {
+    if (0 !== strpos($uri, 'http'))
+      return $uri;
+    return ltrim(strrchr(parse_url($uri, PHP_URL_PATH), '/'), '/');
   }
 
   /**
