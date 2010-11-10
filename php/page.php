@@ -3,9 +3,17 @@ abstract class Page {
   public $title = '';
   public $h1 = '';
   public $content = '';
+  public $assets = '';
   public $meta; // Meta object
+  
+  private static $vars = array();
 
   abstract public function generate($data, $lang);
+
+  public function __construct() {
+    self::$vars = array_keys(get_object_vars($this));
+  }
+  
 
   public function render($template, $type = 'page', $format = 'Content-Type: text/html') {
     if ('page' == $type) {
@@ -17,6 +25,12 @@ abstract class Page {
     $out = ob_get_contents();
     ob_end_clean();
     return $out;
+  }
+
+  public function setProp($prop, $val) {
+    if (in_array($prop, self::$vars)) {
+      $this->$prop = $val;
+    }
   }
 
   // @see http://api.drupal.org/api/function/check_plain/7
