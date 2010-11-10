@@ -3,7 +3,8 @@ abstract class Page {
   public $title = '';
   public $h1 = '';
   public $content = '';
-  public $assets = '';
+  public $assets = ''; // assets path
+  public $root = ''; // root path
   public $meta; // Meta object
   
   private static $vars = array();
