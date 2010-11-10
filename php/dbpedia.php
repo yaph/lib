@@ -14,6 +14,34 @@ class DBpedia {
   private $_properties = array();
 
   private $_parentUri = '';
+  
+  private $_SPARQLResults = array();
+
+  /**
+   * Parse a SPARQL query response and set results property.
+   * @param string $data
+   * @param string $format
+   */
+  public function parseSPARQLResponse($data, $format = 'json') {
+    switch ($format) {
+      case 'json':
+        $data = json_decode($data);
+        $vars = $data->head->vars;
+        $results = $data->results->bindings;
+        foreach ($results as $r) {
+          $values = array();
+          foreach ($vars as $v) {
+            $values[$v] = $r->$v->value;
+          }
+          $this->_SPARQLResults[] = $values;
+        }
+        break;
+    }
+  }
+
+  public function getSPARQLResults() {
+    return $this->_SPARQLResults;
+  }
 
   /**
    * Decode JSON string to PHP object and start to process it.

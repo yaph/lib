@@ -5,7 +5,7 @@ abstract class Page {
   public $content = '';
   public $meta; // Meta object
 
-  abstract public function generate();
+  abstract public function generate($data, $lang);
 
   public function render($template, $type = 'page', $format = 'Content-Type: text/html') {
     if ('page' == $type) {
@@ -18,12 +18,18 @@ abstract class Page {
     ob_end_clean();
     return $out;
   }
-  
+
   // @see http://api.drupal.org/api/function/check_plain/7
   public static function check_plain($text) {
     if (is_string($text))
       return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
     return '';
+  }
+  
+  public static function a($href, $anchor) {
+    return sprintf('<a href="%s">%s</a>',
+      self::check_plain($href),
+      self::check_plain($anchor));
   }
 }
 
