@@ -28,4 +28,3 @@ function countdown(y, m, d, h, mi, s, ms) {
     document.getElementById('countdown').innerHTML='<div id="cd"><h3 id="cdh3">Euro 2012 started</h3></div>';
   }
 }
-countdown(2012, 5, 8, 18);
