@@ -10,10 +10,9 @@ var Countdown = {
     if ("undefined" == typeof mi) mi = 0;
     if ("undefined" == typeof s) s = 0;
     if ("undefined" == typeof ms) ms = 0;
-    var targetUTC = new Date.UTC(y, m, d, h, mi, s, ms);
+    var targetUTC = Date.UTC(y, m, d, h, mi, s, ms);
     var now = new Date();
-    // new Date(year, month, date [, hour, minute, second, millisecond ])
-    var nowUTC = new Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(),
+    var nowUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(),
         now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
     if (nowUTC < targetUTC) {
       var dd = targetUTC - nowUTC;
