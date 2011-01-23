@@ -24,8 +24,8 @@ class WCC {
   public function __construct($opts) {
     $this->cache_lifetime = $opts['cache_lifetime'];
     $this->fs_cache_root_path = $opts['fs_cache_root_path'];
-    #$this->cache = new FSCache($this->fs_cache_root_path);
-    $this->cache = new FSCache();
+    $this->cache = new FSCache($this->fs_cache_root_path);
+    #$this->cache = new FSCache();
   }
 
   public function request($url, $params = array(), $cache_lifetime = false) {
@@ -74,7 +74,7 @@ class FSCache implements URLCache {
 
   private $root_dir = '/tmp';
 
-  public function _construct($root_dir = '') {
+  public function __construct($root_dir = '') {
     if ($root_dir)
       $this->root_dir = $root_dir;
   }
@@ -93,11 +93,12 @@ class FSCache implements URLCache {
    * @param mixed $data
    */
   public function set($id, $data) {
-    if (!file_exists($id))
+    if (!file_exists($id)) {
       $dir = dirname($id);
       if (!file_exists($dir))
         mkdir($dir, self::UMASK, true);
       touch($id);
+    }
     return file_put_contents($id, $data, LOCK_EX);
   }
 
