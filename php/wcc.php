@@ -82,9 +82,10 @@ class FSCache implements URLCache {
    * @param $id file name
    */
   public function get($id, $lifetime) {
-    if ( (0 === $lifetime) 
-      || (file_exists($id) && (filemtime($id) + $lifetime > time())) )
-      return file_get_contents($id);
+    if (file_exists($id)) {
+      if ((0 === $lifetime) || (filemtime($id) + $lifetime > time()) )
+        return file_get_contents($id);
+    }
     return false;
   }
 
