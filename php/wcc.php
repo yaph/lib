@@ -31,7 +31,6 @@ class WCC {
   public function request($url, $params = array(), $cache_lifetime = false) {
     $get_from_cache = $response = false;
     $url = $this->getRequestURL($url, $params);
-
     if (false === $cache_lifetime)
       $cache_lifetime = $this->cache_lifetime;
     if (false !== $cache_lifetime)
@@ -54,10 +53,10 @@ class WCC {
     return $response;
   }
 
-  private function getRequestURL($url, $params = array()) {
+  public function getRequestURL($url, $params = array()) {
     if ($params) {
       asort($params);
-      $url .= '?' . http_build_query($params);
+      $url .= '?' . http_build_query($params, '', '&');
     }
     return $url;
   }
@@ -94,13 +93,19 @@ class FSCache implements URLCache {
    * @param mixed $data
    */
   public function set($id, $data) {
+    $success = false;
+    $old = umask(0);
     if (!file_exists($id)) {
       $dir = dirname($id);
       if (!file_exists($dir))
         mkdir($dir, self::UMASK, true);
       touch($id);
     }
-    return file_put_contents($id, $data, LOCK_EX);
+    if(file_put_contents($id, $data, LOCK_EX)) {
+      $success = chmod($id, self::UMASK);
+    }
+    umask($old);
+    return $success;
   }
 
   public function getIDFromURL($url) {
