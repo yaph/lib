@@ -72,6 +72,15 @@ class WCC {
     return $response;
   }
 
+  public function getAttrVal($attr, $name) {
+    foreach ($attr as $k => $v) {
+      if ($name == $k) {
+        return (string) $v;
+      }
+    }
+    return false;
+  }
+
   /**
    * Returns full URL requested
    * @param void
