@@ -13,7 +13,7 @@ class WCC {
    * File system root path to cache dir.
    * @var string
    */
-  protected $fs_cache_root_path = '';
+  protected $fs_cache_root_path = '/tmp';
 
   /**
    * Cache lifetime in seconds or false.
@@ -32,9 +32,11 @@ class WCC {
    * @param array $opts Associative options array
    * @return void
    */
-  public function __construct($opts) {
-    $this->cache_lifetime = $opts['cache_lifetime'];
-    $this->fs_cache_root_path = $opts['fs_cache_root_path'];
+  public function __construct(array $opts) {
+    if (isset($opts['cache_lifetime']))
+      $this->cache_lifetime = $opts['cache_lifetime'];
+    if (isset($opts['fs_cache_root_path']))
+      $this->fs_cache_root_path = $opts['fs_cache_root_path'];
     $this->cache = new FSCache($this->fs_cache_root_path);
     $this->http = new HTTP();
   }
